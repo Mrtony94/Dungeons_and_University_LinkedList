@@ -120,11 +120,11 @@ class Server(Thread):
                 print("[save_clients] No clients to save")
             else:
                 position = clients_list.head
-                with open('connected_clients', 'w') as f:
+                with open('clients.txt', 'w') as f:
                     while position is not None:
                         f.write(str(position.data) + '\n')
                         position = position.next
-                    print("[save_clients] Clients saved")
+                    print("The names of the clients were saved in the file clients.txt")
 
         except FileNotFoundError:
             print("Error saving clients")

@@ -464,7 +464,7 @@ try:
         stop = False
         while not stop:
             command = input(">>")
-            if command == 'exit' or 'shutdown':
+            if command == 'exit':
                 Server.exit()
                 print("Server stopped.")
                 stop = True

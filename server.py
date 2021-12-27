@@ -16,10 +16,13 @@ import errno
 import game
 import protocols
 from game import Game
+from linkedlist import LinkedList
 
 id = 1
 games = {}
 clients = {}
+clients_list = LinkedList()
+client_info = []
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -60,6 +63,72 @@ class Server(Thread):
         self.socket.bind((Server.IP, port))
         self.socket.listen()
 
+    @staticmethod
+    def exit():
+        global games, clients, clients_list
+        msg = "Server is shutting down"
+        message = {'header': protocols.DC_SERVER, 'reason': msg}
+        for game in games.values():
+            for player in game.all_players():
+                print(f"[DC] {player['name']} has disconnected")
+                protocols.send_one_msg(player['client_socket'], message)
+
+                clients_list.delete(player['name'])
+                if player['client_address'] in clients:
+                    del clients[player['client_address']]
+        games.clear()
+
+    @staticmethod
+    def ngames():
+        global games
+
+        games_alive = 0
+        games_finish = 0
+        for game in games.values():
+            if game.finish_game():
+                games_finish += 1
+            else:
+                games_alive += 1
+
+        print(f"Games alive: {games_alive}")
+        print(f"Games finished: {games_finish}")
+
+    @staticmethod
+    def gamesinfo():
+        global games
+
+        for game in games.values():
+            if not game.finish_game():
+                print(f"----- GAME {game.id} -----")
+                print(f"TOTAL PLAYERS: {len(game.all_players())}")
+                print(f"DEAD PLAYERS: {len(game.dead_players)}")
+                print(f"CURRENT STAGE: {game.current_stage}")
+                print(f"TOTAL STAGES: {game.stages}")
+                print(f"------------------\n")
+
+    @staticmethod
+    def clients():
+        global clients_list
+        print(f"There are {clients_list.size()} clients connected:")
+        clients_list.print_linked_list()
+
+    @staticmethod
+    def save_clients():
+        global clients_list, position
+        try:
+            if clients_list.size == 0:
+                print("[save_clients] No clients to save")
+            else:
+                position = clients_list.head
+                with open('connected_clients', 'w') as f:
+                    while position is not None:
+                        f.write(str(position.data) + '\n')
+                        position = position.next
+                    print("[save_clients] Clients saved")
+
+        except FileNotFoundError:
+            print("Error saving clients")
+
     def run(self):
         ip, port = self.socket.getsockname()
         print(f"Server started at {ip}:{port}")
@@ -84,6 +153,7 @@ class ClientHandler(Thread):
         self.game = None
         self.player = None
         self.end = False
+        self.accepted = False
 
     # --------------------------------------------------------------------------------------------- #
     # STATIC METHODS
@@ -122,12 +192,23 @@ MENU:
     # --------------------------------------------------------------------------------------------- #
 
     def handle_join(self, msg):
+        global clients_list
+
         self.name = msg['name']
-        print(f"(WELCOME) {self.name} has joined the server")
-        self.send_welcome()
+        if clients_list.find(self.name):
+            print(f"The name {self.name} is already in use")
+            self.accepted = False
+            self.end = True
+            self.send_dc_server()
+        else:
+            print(f"(WELCOME-ACCEPTED) {self.name} has joined the server")
+            self.accepted = True
+            clients_list.add_last(self.name)
+            self.send_welcome()
 
     def send_welcome(self):
-        msg = {'header': protocols.WELCOME, 'menu': ClientHandler.menu(), 'options_range': [1, 2, 3, 4]}
+        msg = {'header': protocols.WELCOME, 'accepted': self.accepted, 'menu': ClientHandler.menu(),
+               'options_range': [1, 2, 3, 4]}
         protocols.send_one_msg(self.client_socket, msg)
 
     def send_load_game_answer(self, valid, message):
@@ -140,9 +221,10 @@ MENU:
         protocols.send_one_msg(self.client_socket, msg)
 
     def send_games(self):
+        global clients_list
         if games:
             menu = f"""
-GAMES
+CURRENT GAMES
 **********************\n"""
         else:
             menu = """**********************
@@ -151,6 +233,7 @@ There are not GAMES
 """
             self.send_server_msg_to_one(menu, self.client_socket)
             self.send_dc_server()
+            clients_list.delete(self.name)
 
         option_range = []
         for game in games.values():
@@ -167,15 +250,15 @@ There are not GAMES
         self.client_socket.close()
 
     def send_end_game_all_players(self):
-        global games, clients
+        global games, clients, clients_list
         print(f"(GAME_END) {self.name} game ended.")
         msg = {'header': protocols.END_GAME, 'win': self.game.player_wins()}
         for player in self.game.all_players():
             protocols.send_one_msg(player['client_socket'], msg)
-            if clients[player['client_address']]:
-                clients.pop(player['client_address'])
-        if self.game.id in games:
-            del games[self.game.id]
+
+            clients_list.delete(player['name'])
+            if player['client_address'] in games:
+                del clients[player['client_address']]
         self.end = True
 
     def send_your_turn(self, player):
@@ -286,12 +369,13 @@ There are not GAMES
                 self.send_your_turn(player)
 
     def handle_game_choice(self, msg):
-        global games
+        global games, clients_list
         option = msg['option']
         if option in games:
             game = games[option]
             if game.can_join():
                 self.send_valid_game(False)
+                clients_list.delete(self.name)
             else:
                 global clients
                 self.game = game
@@ -316,9 +400,10 @@ There are not GAMES
                     self.send_choose_character()
         else:
             self.send_valid_game(False)
+            clients_list.delete(self.name)
 
     def handle_dc_me(self):
-        global clients, games
+        global clients, games, clients_list
         print(f"(EXIT) {self.name} disconnected.")
         if self.game:  # si el cliente se va con la partida iniciada
             msg = {'header': protocols.DC_SERVER, 'reason': f"{self.name} disconnected"}
@@ -326,11 +411,12 @@ There are not GAMES
                 if player != self.player:
                     print(f"(DC_ME) {self.name} was disconnected.")
                     protocols.send_one_msg(player['client_socket'], msg)
-                    del clients[player['client_address']]
-            del games[self.game.id]
+                    clients_list.delete(player['name'])
+            self.game.end_game = True
             print(f"{self.name} was disconnected from {self.game.id} game.")
-            del clients[self.player['client_address']]
-            self.end = True
+            if self.client_address in clients:
+                del clients[self.client_address]
+        clients_list.delete(self.name)
 
     # --------------------------------------------------------------------------------------------- #
     # MAIN HANDLER
@@ -377,8 +463,25 @@ try:
         server.start()
         stop = False
         while not stop:
-            input()
-            stop = True
+            command = input(">>")
+            if command == 'exit' or 'shutdown':
+                Server.exit()
+                print("Server stopped.")
+                stop = True
+                print("The server has been stopped.")
+            elif command == 'ngames':
+                Server.ngames()
+            elif command == 'gamesinfo':
+                Server.gamesinfo()
+            elif command == 'clients':
+                Server.clients()
+            elif command == 'save_clients':
+                Server.save_clients()
+            else:
+                print("[ERROR] Invalid command.")
+            print()
+        server.socket.close()
+
     else:
         print("The format of the chosen port is incorrect."
               "You must provide an integer number bigger than 1024")

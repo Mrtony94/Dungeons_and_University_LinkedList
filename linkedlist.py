@@ -81,7 +81,7 @@ class LinkedList:
         if self.head is None:
             print("List is empty.")
         else:
-            LinkedList.iterate_backwards(self.head, 1)
+            LinkedList.iterate_backwards(self.head)
 
     def print_backwards(self):
         if self.head is None:
@@ -115,12 +115,14 @@ class LinkedList:
 
     def print_linked_list(self):
         n = self.head
+        player = 1
         if not n:
             print("Linked list is empty")
         else:
             while n is not None:
-                print(n.data)
+                print(f"User {player}: {n.data}")
                 n = n.next
+                player += 1
 
     def size(self):
         count = 0
@@ -130,4 +132,3 @@ class LinkedList:
                 count += 1
                 n = n.next
         return count
-

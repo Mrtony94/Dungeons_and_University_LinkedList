@@ -11,23 +11,6 @@ class LinkedList:
     def __init__(self):
         self.head = None
 
-    def __str__(self):
-        result = "["
-        if self.head:
-            node = self.head
-            while node.next:
-                result += f"{node.data}, "
-                node = node.next
-            result += f"{node.data}"
-        result += "]"
-        return result
-
-    def __iter__(self):
-        node = self.head
-        while node:
-            yield node
-            node = node.next
-
     def add_first(self, data):
         if not self.head:
             self.head = Node(data)
@@ -98,7 +81,7 @@ class LinkedList:
         if self.head is None:
             print("List is empty.")
         else:
-            LinkedList.iterate_backwards(self.head)
+            LinkedList.iterate_backwards(self.head, 1)
 
     def print_backwards(self):
         if self.head is None:
@@ -147,3 +130,4 @@ class LinkedList:
                 count += 1
                 n = n.next
         return count
+

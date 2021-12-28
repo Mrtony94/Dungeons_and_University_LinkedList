@@ -1,0 +1,1 @@
+{"stages": 1, "current_stage": 1, "player_turn": 1, "players_list": [{"character": {"class": "Bookworm", "hp": 25}}, {"character": {"class": "Bookworm", "hp": 25}}], "enemies_list": [{"class": "Teacher", "hp": 15}, {"class": "TheoricalClass", "hp": 8}], "dead_players": []}

@@ -147,5 +147,3 @@ class LinkedList:
                 count += 1
                 n = n.next
         return count
-
-

@@ -108,12 +108,17 @@ class Client:
         protocols.send_one_msg(self.socket, msg)
 
     def handle_welcome(self, msg):
-        option = Client.get_int_option(msg['menu'], msg['options_range'])
-        if option == 3:
-            file_name = input("What's the name of the game: ")
-            self.send_load_game(file_name)
+        accepted = msg['accepted']
+        if not accepted:
+            self.end = True
+            print(f"\nThe name {self.name} is already in use\n{game.Bcolors.MONSTER}Disconected....{game.Bcolors.RESET}\n")
         else:
-            self.send_server_option(option)
+            option = Client.get_int_option(msg['menu'], msg['options_range'])
+            if option == 3:
+                file_name = input("What's the name of the game: ")
+                self.send_load_game(file_name)
+            else:
+                self.send_server_option(option)
 
     # --------------------------------------------------------------------------------------------- #
     # FUNCIONES SEND

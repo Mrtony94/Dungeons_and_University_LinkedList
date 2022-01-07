@@ -199,7 +199,7 @@ MENU:
             print(f"The name {self.name} is already in use")
             self.accepted = False
             self.end = True
-            self.send_dc_server()
+            self.send_welcome()
         else:
             print(f"(WELCOME-ACCEPTED) {self.name} has joined the server")
             self.accepted = True
@@ -464,7 +464,7 @@ try:
         stop = False
         while not stop:
             command = input(">>")
-            if command == 'exit':
+            if command == 'exit' or command == 'shutdown':
                 Server.exit()
                 print("Server stopped.")
                 stop = True

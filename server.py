@@ -109,23 +109,31 @@ class Server(Thread):
     @staticmethod
     def clients():
         global clients_list
-        print(f"There are {clients_list.size()} clients connected:")
-        clients_list.print_linked_list()
+
+        print(f"There are {clients_list.size()} connected to the server:")
+        if clients_list.size() != 0:
+            node = clients_list.head
+            while node.next:
+                print(f"{node.data}, ", end="")
+                node = node.next
+            print(node.data)
 
     @staticmethod
     def save_clients():
-        global clients_list, position
+        global clients_list
         try:
-            if clients_list.size == 0:
-                print("[save_clients] No clients to save")
-            else:
-                position = clients_list.head
-                with open('clients.txt', 'w') as f:
-                    while position is not None:
-                        f.write(str(position.data) + '\n')
-                        position = position.next
-                    print("The names of the clients were saved in the file clients.txt")
-
+            # Si queremos meter por terminal el nombre del fichero lo hariamos de la siguiente forma:
+            # archivo = input("Introduce el nombre del archivo: ")
+            # with open(archivo, 'w') as f:
+            with open("connected_clients", 'w') as f:
+                node = clients_list.head
+                if clients_list.size() != 0:
+                    while node:
+                        f.write(f"{node.data}\n")
+                        node = node.next
+                    print("The names of the clients were saved in the file connected_clients.txt")
+                else:
+                    print("There are no clients connected to the server")
         except FileNotFoundError:
             print("Error saving clients")
 

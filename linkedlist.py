@@ -24,7 +24,7 @@ class LinkedList:
             self.head = Node(data)
         else:
             n = self.head
-            while n.next is not None:
+            while n.next != None:
                 n = n.next
             n.next = Node(data)
 
@@ -33,12 +33,14 @@ class LinkedList:
         if not n:
             return None
         else:
+            node_found = None
             found = False
-            while n is not None and not found:
+            while n != None and not found:
                 if n.data == data:
+                    node_found = n.data
                     found = True
                 n = n.next
-            return found
+            return node_found
 
     def find_all(self, data):
         n = self.head
@@ -46,7 +48,7 @@ class LinkedList:
             return None
         else:
             list_results = []
-            while n is not None:
+            while n != None:
                 if n.data == data:
                     list_results.append(n.data)
                 n = n.next
@@ -59,7 +61,7 @@ class LinkedList:
             n = self.head
             n_prev = None
             found = False
-            while n is not None and not found:
+            while n != None and not found:
                 if n.data == data:
                     if n_prev is None:
                         self.head = n.next
@@ -89,7 +91,7 @@ class LinkedList:
         else:
             new_list = []
             n = self.head
-            while n is not None:
+            while n != None:
                 new_list.append(n.data)
                 n = n.next
             for e in reversed(new_list):
@@ -102,7 +104,7 @@ class LinkedList:
             n = self.head
             n_prev = None
             found = False
-            while n is not None:
+            while n != None:
                 if n.data == data:
                     if n_prev is None:
                         self.head = n.next
@@ -115,20 +117,18 @@ class LinkedList:
 
     def print_linked_list(self):
         n = self.head
-        player = 1
         if not n:
             print("Linked list is empty")
         else:
-            while n is not None:
-                print(f"User {player}: {n.data}")
+            while n != None:
+                print(n.data)
                 n = n.next
-                player += 1
 
     def size(self):
         count = 0
-        if self.head is not None:
+        if self.head != None:
             n = self.head
-            while n is not None:
+            while n != None:
                 count += 1
                 n = n.next
         return count

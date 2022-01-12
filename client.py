@@ -18,7 +18,7 @@ import protocols
 
 def parse_args():
     args, trash = getopt.getopt(sys.argv[1:], 's:n:i:p:',
-                                ["stages=", "name=", "ip=", "port="])  # version corta - y version larga --
+                                ["stages=", "name=", "ip=", "port="])
     port = 7123
     ip = '127.0.0.1'
     name = ""

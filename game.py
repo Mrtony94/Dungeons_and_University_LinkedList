@@ -74,7 +74,7 @@ class Game:
                 game.players_list.append({'character': Worker(character_dict['hp'])})
             elif character_dict['class'] == Procrastinator.__name__:
                 game.players_list.append({'character': Procrastinator(character_dict['hp'])})
-            else:  # character_dict['class'] == Whatsapper.__class__.__name__:
+            else:
                 game.players_list.append({'character': Whatsapper(character_dict['hp'])})
 
         for enemy_dict in dict_data['enemies_list']:
@@ -84,7 +84,7 @@ class Game:
                 game.enemies_list.append(FinalExam(game.current_stage, enemy_dict['hp']))
             elif enemy_dict['class'] == TheoricalClass.__name__:
                 game.enemies_list.append(TheoricalClass(game.current_stage, enemy_dict['hp']))
-            else:  # enemy_dict['class'] == Teacher.__class__.__name__:
+            else:
                 game.enemies_list.append(Teacher(game.current_stage, enemy_dict['hp']))
 
         for player_dict in dict_data['dead_players']:
@@ -95,7 +95,7 @@ class Game:
                 game.dead_players.append({'character': Worker(character_dict['hp'])})
             elif character_dict['class'] == Procrastinator.__name__:
                 game.dead_players.append({'character': Procrastinator(character_dict['hp'])})
-            else:  # character_dict['class'] == Whatsapper.__class__.__name__:
+            else:
                 game.dead_players.append({'character': Whatsapper(character_dict['hp'])})
 
         game.player_turn = dict_data["player_turn"]

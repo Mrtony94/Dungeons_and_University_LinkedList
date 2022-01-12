@@ -125,7 +125,7 @@ class Server(Thread):
             # Si queremos meter por terminal el nombre del fichero lo hariamos de la siguiente forma:
             # archivo = input("Introduce el nombre del archivo: ")
             # with open(archivo, 'w') as f:
-            with open("connected_clients", 'w') as f:
+            with open("connected_clients.txt", 'w') as f:
                 node = clients_list.head
                 if clients_list.size() != 0:
                     while node:
